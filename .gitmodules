@@ -1,0 +1,3 @@
+[submodule "WPS_OSM-REF-Comparison"]
+	path = WPS_OSM-REF-Comparison
+	url = https://github.com/GabrielePrestifilippo/WPS_OSM-REF-Comparison.git
