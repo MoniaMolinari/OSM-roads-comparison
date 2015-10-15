@@ -9,5 +9,5 @@ The modules are independent, however users are suggested to apply them subsequen
 ## Installation
 We will soon post the installation instructions here.
 
-## Publications
+## Related academic publications
 * Brovelli M. A., Minghini M., Molinari M. & Mooney P. (2015) A FOSS4G-based procedure to compare OpenStreetMap and authoritative road network datasets. *Geomatics Workbooks* 12, pp. 235-238, ISSN 1591-092X [[pdf](http://geomatica.como.polimi.it/workbooks/n12/FOSS4G-eu15_submission_70.pdf)]
