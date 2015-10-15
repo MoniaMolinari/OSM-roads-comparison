@@ -7,7 +7,7 @@ This folder contains 3 Python modules for [GRASS GIS](https://grass.osgeo.org/) 
 The modules are independent, however users are suggested to apply them subsequently to maximize the effectiveness of the procedure.
 
 ## Installation
-Text text text
+We will soon post the installation instructions here.
 
 ## Publications
-* Brovelli M. A., Minghini M., Molinari M. and Mooney P. (2015) A FOSS4G-based procedure to compare OpenStreetMap and authoritative road network datasets. *Geomatics Workbooks* 12, pp.  235-238, ISSN 1591-092X [[pdf](http://geomatica.como.polimi.it/workbooks/n12/FOSS4G-eu15_submission_70.pdf)]
+* Brovelli M. A., Minghini M., Molinari M. and Mooney P. (2015) A FOSS4G-based procedure to compare OpenStreetMap and authoritative road network datasets. *Geomatics Workbooks* 12, pp. 235-238, ISSN 1591-092X [[pdf](http://geomatica.como.polimi.it/workbooks/n12/FOSS4G-eu15_submission_70.pdf)]
