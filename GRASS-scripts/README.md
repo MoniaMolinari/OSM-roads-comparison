@@ -13,8 +13,8 @@ The modules are independent, however users are suggested to apply them subsequen
 * Open a terminal window, enter each of the three folders and compile the code. For example, for the `v.osm.precomp` module, type:
 ```
 cd path-to-GRASS-folder/scripts/v.osm.precomp
-make
-make install
+sudo make
+sudo make install
 ```
 
 ## Related academic publications
