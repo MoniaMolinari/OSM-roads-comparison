@@ -71,11 +71,15 @@ import time
 import grass.script as grass
 
 def length(data):
-    length_data = grass.read_command("v.to.db",map=data,option="length",flags="p")
-    s_data=0   
-    l_data = length_data.split("\n")
-    for item in l_data[1:-1]:
-        s_data+=float(item.split("|")[1])      
+    feat_osm = int(((grass.read_command("v.info", map=data,flags="t",quiet=True)).split("\n")[2]).split("=")[1])
+    if feat_osm>0:
+        length_data = grass.read_command("v.to.db",map=data,option="length",flags="p")
+        s_data=0 
+        l_data = length_data.split("\n")
+        for item in l_data[1:-1]:
+            s_data+=float(item.split("|")[1])         
+    else:
+        s_data=0
     return s_data
 
 
@@ -127,6 +131,15 @@ def main():
     l_osm = length(osm)
     l_ref = length(ref)
 
+    if l_ref == 0:
+        grass.run_command("g.remove", type="vect", pattern="%s"%processid,flags="fr",quiet=True)
+        grass.fatal(_("No reference data for comparison"))
+
+    if l_osm == 0:
+        grass.run_command("g.remove", type="vect", pattern="%s"%processid,flags="fr",quiet=True)
+        grass.fatal(_("No OSM data for comparison"))
+
+
     ## Generalize
     if doug:
         grass.run_command("v.generalize",input=ref,output=ref_gen,method="douglas", threshold=doug,quiet=True)
@@ -141,7 +154,7 @@ def main():
     shutil.rmtree('/tmp/%s/'%ref_split)
 
     ## Split OSM datasets
-    grass.run_command("v.split",input=osm,output=osm_split,vertices=2,quiet=True)   
+    grass.run_command("v.split",input=osm,output=osm_split,vertices=2,quiet=True)
     grass.run_command("v.out.ogr",input=osm_split,output="/tmp/%s"%osm_split,flags="s",quiet=True)
     grass.run_command("g.remove",type="vect",name=osm_split,flags="f",quiet=True)
     grass.run_command("v.in.ogr",input="/tmp/%s/%s.shp"%(osm_split,osm_split),output=osm_split,quiet=True)
@@ -162,7 +175,7 @@ def main():
     ## Create new vector map
     grass.run_command("v.edit",map=patch+"_0_0",tool="create",quiet=True)
     
-    list_feature = grass.read_command("v.db.select",map=ref,columns="cat",flags="c").split("\n")[0:-1]
+    list_feature = grass.read_command("v.db.select",map=ref,columns="cat",flags="c",quiet=True).split("\n")[0:-1]
     i=0
     z=0
     #print list_feature
@@ -176,12 +189,12 @@ def main():
             grass.run_command("v.buffer",input=fdata+"_%s"%f,output=fbuffer+"_%s"%f,distance=bf,overwrite=True,quiet=True)
 
         grass.run_command("v.overlay",ainput=osm, atype="line",binput=fbuffer+"_%s"%f,output=odata+"_%s"%f,operator="and",overwrite=True,quiet=True)
-        lines = ((grass.read_command("v.info", map=odata+"_%s"%f,flags="t")).split("\n")[2]).split("=")[1]
+        lines = ((grass.read_command("v.info", map=odata+"_%s"%f,flags="t",quiet=True)).split("\n")[2]).split("=")[1]
         if int(lines)==0:
             grass.run_command("g.remove", type="vect", name="%s_%s,%s_%s,%s_%s"%(fdata,f,fbuffer,f,odata,f),flags="f",quiet=True)
         else:
             ## Get REF angular coefficient
-            list_subfeature = grass.read_command("v.db.select",map=odata+"_%s"%f,columns="cat",flags="c").split("\n")[0:-1]
+            list_subfeature = grass.read_command("v.db.select",map=odata+"_%s"%f,columns="cat",flags="c",quiet=True).split("\n")[0:-1]
             m_ref = GetCoeff(fdata+"_%s"%f)
             #print m_ref
 
@@ -201,13 +214,13 @@ def main():
             grass.run_command("g.remove", type="vect", name="%s_%s,%s_%s,%s_%s"%(fdata,f,fbuffer,f,odata,f), flags="f",quiet=True)
 
     ## Clean output map
-    l_map = grass.read_command("g.list",type="vect").split("\n")[0:-1]
+    l_map = grass.read_command("g.list",type="vect",quiet=True).split("\n")[0:-1]
     last_map = [s for s in l_map if "patch" in s]
-    grass.run_command("v.buffer", input=last_map[0],output=outbuff, distance=0.0001)
-    grass.run_command("v.overlay",ainput=osm_orig,atype="line",binput=outbuff,output=out,operator="and",flags="t")
+    grass.run_command("v.buffer", input=last_map[0],output=outbuff, distance=0.0001,quiet=True)
+    grass.run_command("v.overlay",ainput=osm_orig,atype="line",binput=outbuff,output=out,operator="and",flags="t",quiet=True)
 
     ## Delete all maps
-    grass.run_command("g.remove",type="vect",name="%s,%s,%s,%s,%s,%s,%s"%(deg_points,ref_degmin,degmin_points,ref_gen,ref_split,osm_split,outbuff),flags="f")
+    grass.run_command("g.remove",type="vect",name="%s,%s,%s,%s,%s,%s,%s"%(deg_points,ref_degmin,degmin_points,ref_gen,ref_split,osm_split,outbuff),flags="f",quiet=True)
 
     grass.run_command("g.remove",type="vect",name="%s"%last_map[0],flags="f",quiet=True)
 
@@ -229,12 +242,12 @@ def main():
         fil.close()   
 
     ## Print statistics
-    grass.message("#####################################################################\n")
-    grass.message("Original OSM dataset length: %s m\n"%(round(l_osm,1)))
-    grass.message("Processed OSM dataset length: %s m\n"%(round(l_osm_proc,1)))
-    grass.message("Difference between OSM original and processed datasets length: %s m (%s%%)\n"%(round(diff_osm,1),round(diff_p_osm,1)))
-    grass.message("Difference between REF dataset and processed OSM dataset length: %s m (%s%%)\n"%(round(diff_new,1),round(diff_p_new,1)))
-    grass.message("#####################################################################\n")
+    print("#####################################################################\n")
+    print("Original OSM dataset length: %s m\n"%(round(l_osm,1)))
+    print("Processed OSM dataset length: %s m\n"%(round(l_osm_proc,1)))
+    print("Difference between OSM original and processed datasets length: %s m (%s%%)\n"%(round(diff_osm,1),round(diff_p_osm,1)))
+    print("Difference between REF dataset and processed OSM dataset length: %s m (%s%%)\n"%(round(diff_new,1),round(diff_p_new,1)))
+    print("#####################################################################\n")
     
 
 
