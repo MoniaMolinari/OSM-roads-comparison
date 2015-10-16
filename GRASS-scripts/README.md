@@ -10,8 +10,9 @@ The modules are independent, however users are suggested to apply them subsequen
 
 ## Installation
 * Copy the three folders in the `scripts` folder, which is inside the GRASS source code folder
-* Open a terminal window, `cd` to each of the three folders and type:
+* Open a terminal window, enter each of the three folders and compile the code. For example, for the `v.osm.precomp` module, type:
 ```
+cd path-to-GRASS-folder/scripts/v.osm.precomp
 make
 make install
 ```
