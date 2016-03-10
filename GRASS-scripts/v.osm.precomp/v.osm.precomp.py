@@ -61,6 +61,17 @@
 import sys
 import time
 import grass.script as grass
+import os
+
+
+def checkPath(path):
+    if os.path.exists(path):
+        return
+    else:
+        try:
+            os.mkdir(path)
+        except:
+            grass.errors(_("The path '{st}' doesn't exists".format(st=path)))
 
 
 def GetStat(osm, ref, buff, processid):
@@ -317,6 +328,7 @@ def main():
         l_var_ref_out.append(round(s_ref_out / s_ref * 100, 1))
 
     # Print statistics
+    checkPath(os.path.split(out)[0])
     fil = open(out, "w")
     fil.write("REF length: %s m\n"%(round(s_ref, 1)))
     fil.write("OSM length: %s m\n"%(round(s_osm, 1)))
@@ -332,6 +344,7 @@ def main():
                       pattern="{st}*".format(st=processid), quiet=True)
 
     # Graphs
+    checkPath(out_graphs)
     if out_graphs:
         Plot(list_buff, l_osm_in, l_ref_in, s_ref, s_osm, out_graphs)
 
