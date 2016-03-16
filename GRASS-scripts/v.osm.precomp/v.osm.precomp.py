@@ -58,29 +58,43 @@
 #% required: yes
 #%end
 
+#%option
+#% key: nprocs
+#% type: integer
+#% description: Number of processes to run in parallel
+#% required: no
+#% multiple: no
+#% answer: 1
+#%end
+
 import sys
 import time
 import grass.script as grass
 import os
+from multiprocessing import Queue, Process
+from types import TupleType
 
 
 def checkPath(path):
     if os.path.exists(path):
-        return
+        return 0
     else:
         try:
             os.mkdir(path)
+            return 0
         except:
             grass.errors(_("The path '{st}' doesn't exists".format(st=path)))
+            return 1
 
 
 def GetStat(osm, ref, buff, processid):
-    ref_buffer = "ref_buffer_" + processid
-    osm_buffer = "osm_buffer_" + processid
-    ref_in = "ref_in_" + processid
-    ref_out = "ref_out_" + processid
-    osm_in = "osm_in_" + processid
-    osm_out = "osm_out_" + processid
+    buffs = str(buff).replace('.', '_')
+    ref_buffer = "ref_buffer_{idd}_{buf}".format(idd=processid, buf=buffs)
+    osm_buffer = "osm_buffer_{idd}_{buf}".format(idd=processid, buf=buffs)
+    ref_in = "ref_in_{idd}_{buf}".format(idd=processid, buf=buffs)
+    ref_out = "ref_out_{idd}_{buf}".format(idd=processid, buf=buffs)
+    osm_in = "osm_in_{idd}_{buf}".format(idd=processid, buf=buffs)
+    osm_out = "osm_out_{idd}_{buf}".format(idd=processid, buf=buffs)
 
     # Calculate REF data in and out OSM buffer
     grass.run_command("v.buffer", input=osm, output=osm_buffer, distance=buff,
@@ -107,8 +121,8 @@ def GetStat(osm, ref, buff, processid):
     s_osm_out = length(osm_out)
 
     # Remove temporary data
-    grass.run_command("g.remove", type="vect", flags="fr",
-                      pattern="{st}*".format(st=processid), quiet=True)
+    grass.run_command("g.remove", type="vect", flags="fr", quiet=True,
+                      pattern="*{st}_{buf}".format(st=processid, buf=buffs))
 
     return (s_ref_in, s_ref_out, s_osm_in, s_osm_out)
 
@@ -227,6 +241,7 @@ def Plot(buff, osm_in, ref_in, REF_tot, OSM_tot, out):
     pylab.legend(loc="upper right")
     pylab.grid()
     pylab.savefig("{st}/ref_out_perc.png".format(st=out))
+    return 0
 
 
 def length(data):
@@ -251,6 +266,35 @@ def GetInfo(fileName):
     return (float(ref_in), float(osm_in))
 
 
+def calculate(osm, s_osm, ref, s_ref, b, processid):
+    (s_ref_in, s_ref_out, s_osm_in, s_osm_out) = GetStat(osm, ref, b,
+                                                         processid)
+    osm_in = round(s_osm_in, 1)
+    var_osm_in = round(s_osm_in / s_osm * 100, 1)
+    ref_in = round(s_ref_in, 1)
+    var_ref_in = round(s_ref_in / s_ref * 100, 1)
+    osm_out = round(s_osm_out, 1)
+    var_osm_out = round(s_osm_out / s_osm * 100, 1)
+    ref_out = round(s_ref_out, 1)
+    var_ref_out = round(s_ref_out / s_ref * 100, 1)
+
+    out = "{bi}|{oi}|{voi}|{oo}|{voo}|{ri}|{vri}|{ro}|{vro}" \
+          "\n".format(bi=b, oi=osm_in, voi=var_osm_in, oo=osm_out,
+                      voo=var_osm_out, ri=ref_in, vri=var_ref_in,
+                      ro=ref_out, vro=var_ref_out)
+    return osm_in, ref_in, out
+
+
+def spawn(func):
+    def fun(q_in, q_out):
+        while True:
+            osm, so, ref, sr, b, pr = q_in.get()
+            if b is None:
+                break
+            q_out.put(func(osm, so, ref, sr, b, pr))
+    return fun
+
+
 def main():
     processid = str(time.time()).replace(".", "_")
     osm = options["osm"]
@@ -259,6 +303,7 @@ def main():
     roi = options["roi"]
     out_graphs = options["out_graphs"]
     out = options["output"]
+    nproc = int(options["nprocs"])
 
     # Check if input files exist
     if not grass.find_file(name=osm, element='vector')['file']:
@@ -306,15 +351,26 @@ def main():
     list_buff = map(float, buff.split(","))
 
     # Calculate list of statistics
-    l_osm_out = []
-    l_var_osm_out = []
-    l_ref_out = []
-    l_var_ref_out = []
     l_osm_in = []
-    l_var_osm_in = []
     l_ref_in = []
-    l_var_ref_in = []
 
+    q_in = Queue(1)
+    q_out = Queue()
+    procs = [Process(target=spawn(calculate), args=(q_in, q_out))
+             for _ in range(nproc)]
+    for proc in procs:
+        proc.daemon = True
+        proc.start()
+    # for each file create the polygon of bounding box
+    ans = [q_in.put((osm, s_osm, ref, s_ref, i, processid)) for i in list_buff]
+
+    # set the end of the cycle
+    [q_in.put((None, None, None, None, None, None)) for proc in procs]
+    [proc.join() for proc in procs]
+    processed = [q_out.get() for _ in ans]
+    if len(processed) != len(list_buff):
+        print "Some errors occurred during analysis"
+        return 0
     # Print statistics
     checkPath(os.path.split(out)[0])
     fil = open(out, "w")
@@ -325,38 +381,18 @@ def main():
     fil.write("\n")
     fil.write("BUFFER(m)|OSM_IN(m)|OSM_IN(%%)|OSM_OUT(m)|OSM_OUT(%%)|REF_IN(m)"
               "|REF_IN(%%)|REF_OUT(m)|REF_OUT(%%)\n")
-
-    for b in list_buff:
-        (s_ref_in, s_ref_out, s_osm_in, s_osm_out) = GetStat(osm, ref, b,
-                                                             processid)
-        osm_in = round(s_osm_in, 1)
-        l_osm_in.append(osm_in)
-        var_osm_in = round(s_osm_in / s_osm * 100, 1)
-        l_var_osm_in.append(var_osm_in)
-        ref_in = round(s_ref_in, 1)
-        l_ref_in.append(ref_in)
-        var_ref_in = round(s_ref_in / s_ref * 100, 1)
-        l_var_ref_in.append(var_ref_in)
-        osm_out = round(s_osm_out, 1)
-        l_osm_out.append(osm_out)
-        var_osm_out = round(s_osm_out / s_osm * 100, 1)
-        l_var_osm_out.append(var_osm_out)
-        ref_out = round(s_ref_out, 1)
-        l_ref_out.append(ref_out)
-        var_ref_out = round(s_ref_out / s_ref * 100, 1)
-        l_var_ref_out.append(var_ref_out)
-
-        fil.write("{bi}|{oi}|{voi}|{oo}|{voo}|{ri}|{vri}|{ro}|{vro}"
-                  "\n".format(bi=b, oi=osm_in, voi=var_osm_in, oo=osm_out,
-                              voo=var_osm_out, ri=ref_in, vri=var_ref_in,
-                              ro=ref_out, vro=var_ref_out))
+    for p in processed:
+        if type(p) != TupleType or len(p) != 3:
+            print "Some errors occurred during analysis"
+            return 0
+        l_osm_in.append(p[0])
+        l_ref_in.append(p[1])
+        fil.write(p[2])
 
     fil.close()
-
     # Remove temporary data
     grass.run_command("g.remove", type="vect", flags="fr",
                       pattern="{st}*".format(st=processid), quiet=True)
-
     # Graphs
     checkPath(out_graphs)
     if out_graphs:
