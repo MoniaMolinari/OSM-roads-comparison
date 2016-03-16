@@ -3,6 +3,7 @@
 ##############################################################################
 # MODULE:    v.osm.precomp
 # AUTHOR(S): Monia Molinari, Marco Minghini
+#            Luca Delucchi added multiprocessing
 # PURPOSE:   Tool for the comparison of two road datasets
 # COPYRIGHT: (C) 2015 by the GRASS Development Team
 #
