@@ -315,28 +315,42 @@ def main():
     l_ref_in = []
     l_var_ref_in = []
 
-    for b in list_buff:
-        (s_ref_in, s_ref_out, s_osm_in, s_osm_out) = GetStat(osm, ref, b,
-                                                             processid)
-        l_osm_in.append(round(s_osm_in, 1))
-        l_var_osm_in.append(round(s_osm_in / s_osm * 100, 1))
-        l_ref_in.append(round(s_ref_in, 1))
-        l_var_ref_in.append(round(s_ref_in / s_ref * 100, 1))
-        l_osm_out.append(round(s_osm_out, 1))
-        l_var_osm_out.append(round(s_osm_out / s_osm * 100, 1))
-        l_ref_out.append(round(s_ref_out, 1))
-        l_var_ref_out.append(round(s_ref_out / s_ref * 100, 1))
-
     # Print statistics
     checkPath(os.path.split(out)[0])
     fil = open(out, "w")
-    fil.write("REF length: %s m\n"%(round(s_ref, 1)))
-    fil.write("OSM length: %s m\n"%(round(s_osm, 1)))
-    fil.write("REF-OSM difference: %s m (%s%%)\n"%((round(diff, 1)),(round(diff_p, 1))))
+    fil.write("REF length: {rl} m\n".format(rl=round(s_ref, 1)))
+    fil.write("OSM length: {ol} m\n".format(ol=round(s_osm, 1)))
+    fil.write("REF-OSM difference: {di} m ({dp}%)\n".format(di=round(diff, 1),
+                                                            dp=round(diff_p, 1)))
     fil.write("\n")
-    fil.write("BUFFER(m)|OSM_IN(m)|OSM_IN(%%)|OSM_OUT(m)|OSM_OUT(%%)|REF_IN(m)|REF_IN(%%)|REF_OUT(m)|REF_OUT(%%)\n")
-    for item in range(len(list_buff)):
-        fil.write("%s|%s|%s|%s|%s|%s|%s|%s|%s\n"%(list_buff[item],l_osm_in[item],l_var_osm_in[item],l_osm_out[item],l_var_osm_out[item],l_ref_in[item],l_var_ref_in[item],l_ref_out[item],l_var_ref_out[item]))
+    fil.write("BUFFER(m)|OSM_IN(m)|OSM_IN(%%)|OSM_OUT(m)|OSM_OUT(%%)|REF_IN(m)"
+              "|REF_IN(%%)|REF_OUT(m)|REF_OUT(%%)\n")
+
+    for b in list_buff:
+        (s_ref_in, s_ref_out, s_osm_in, s_osm_out) = GetStat(osm, ref, b,
+                                                             processid)
+        osm_in = round(s_osm_in, 1)
+        l_osm_in.append(osm_in)
+        var_osm_in = round(s_osm_in / s_osm * 100, 1)
+        l_var_osm_in.append(var_osm_in)
+        ref_in = round(s_ref_in, 1)
+        l_ref_in.append(ref_in)
+        var_ref_in = round(s_ref_in / s_ref * 100, 1)
+        l_var_ref_in.append(var_ref_in)
+        osm_out = round(s_osm_out, 1)
+        l_osm_out.append(osm_out)
+        var_osm_out = round(s_osm_out / s_osm * 100, 1)
+        l_var_osm_out.append(var_osm_out)
+        ref_out = round(s_ref_out, 1)
+        l_ref_out.append(ref_out)
+        var_ref_out = round(s_ref_out / s_ref * 100, 1)
+        l_var_ref_out.append(var_ref_out)
+
+        fil.write("{bi}|{oi}|{voi}|{oo}|{voo}|{ri}|{vri}|{ro}|{vro}"
+                  "\n".format(bi=b, oi=osm_in, voi=var_osm_in, oo=osm_out,
+                              voo=var_osm_out, ri=ref_in, vri=var_ref_in,
+                              ro=ref_out, vro=var_ref_out))
+
     fil.close()
 
     # Remove temporary data
