@@ -6,9 +6,4 @@ This repository contains scripts for comparing road network datasets from [OpenS
 Detailed instructions on how to use the tools are provided in each of the two folders. 
 
 ## Related academic publications
-* Brovelli M. A., Minghini M., Molinari M. & Mooney P. (2016) Towards an Automated Comparison of OpenStreetMap with Authoritative Road Datasets. *Transactions in GIS*, DOI 10.1111/tgis.12182 [[pdf](https://www.researchgate.net/profile/Marco_Minghini/publication/298296464_Towards_an_Automated_Comparison_of_OpenStreetMap_with_Authoritative_Road_Datasets/links/56e7c9e108ae4c354b1d001a.pdf)]
-
 * Brovelli M. A., Minghini M., Molinari M. & Mooney P. (2015) A FOSS4G-based procedure to compare OpenStreetMap and authoritative road network datasets. *Geomatics Workbooks* 12, pp. 235-238, ISSN 1591-092X [[pdf](http://geomatica.como.polimi.it/workbooks/n12/FOSS4G-eu15_submission_70.pdf)]
-
-## Related academic presentations
-* Brovelli M. A., Minghini M. & Molinari M. (2016) A GRASS-based automated procedure to compare OpenStreetMap and authoritative road network datasets. Presented at the XVII Meeting of GRASS and FOSS4G Italian users, Parma (Italy), February 11-12 2016 [[pdf](http://www.slideshare.net/mingo23/a-grassbased-automated-procedure-to-compare-openstreetmap-and-authoritative-road-network-datasets)]
