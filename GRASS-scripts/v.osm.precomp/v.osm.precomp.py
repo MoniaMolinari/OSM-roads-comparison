@@ -84,7 +84,7 @@ def checkPath(path):
             os.mkdir(path)
             return 0
         except:
-            grass.errors(_("The path '{st}' doesn't exists".format(st=path)))
+            grass.error(_("The path '{st}' doesn't exists".format(st=path)))
             return 1
 
 
