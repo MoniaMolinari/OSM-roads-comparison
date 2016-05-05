@@ -370,7 +370,7 @@ def main():
     [proc.join() for proc in procs]
     processed = [q_out.get() for _ in ans]
     if len(processed) != len(list_buff):
-        print "Some errors occurred during analysis"
+        grass.fatal(_("Some errors occurred during analysis"))
         return 0
     # Print statistics
     checkPath(os.path.split(out)[0])
@@ -384,7 +384,7 @@ def main():
               "|REF_IN(%%)|REF_OUT(m)|REF_OUT(%%)\n")
     for p in processed:
         if type(p) != TupleType or len(p) != 3:
-            print "Some errors occurred during analysis"
+            grass.fatal(_("Some errors occurred during analysis"))
             return 0
         l_osm_in.append(p[0])
         l_ref_in.append(p[1])
