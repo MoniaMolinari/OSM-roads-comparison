@@ -18,7 +18,7 @@ sudo make install
 ```
 ## Running the Script (Linux)
 To simply run the scripts without installing them:
-* From GRASS top menu select `File`
+* From GRASS GIS top menu select `File`
 * Select `Launch Script`
 * Select a ".py" module such as "v.osm.precomp.py"
 * Select `Open`
