@@ -316,3 +316,4 @@ def main():
 if __name__ == "__main__":
     options,flags = grass.parser()
     sys.exit(main())
+	
