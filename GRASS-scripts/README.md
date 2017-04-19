@@ -17,12 +17,11 @@ sudo make
 sudo make install
 ```
 ## Running the Script (Linux)
-To run simply the script, the installation is not mandatory, but recommended.
-* From GRASS top menu select File
-* Launch Script
+To simply run the scripts without installing them:
+* From GRASS top menu select `File`
+* Select `Launch Script`
 * Select a ".py" module such as "v.osm.precomp.py"
-* Select Open
-* Run the Script
+* Select `Open`
 
 ## Related academic publications
 * Brovelli M. A., Minghini M., Molinari M. & Mooney P. (2015) A FOSS4G-based procedure to compare OpenStreetMap and authoritative road network datasets. *Geomatics Workbooks* 12, pp. 235-238, ISSN 1591-092X [[pdf](http://geomatica.como.polimi.it/workbooks/n12/FOSS4G-eu15_submission_70.pdf)]
