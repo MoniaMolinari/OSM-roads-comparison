@@ -8,7 +8,7 @@ The modules are independent, however users are suggested to apply them subsequen
 
 **NOTE**: current versions are tested in GRASS GIS 7.1 (development version) and NOT in previous releases. Authors will update the modules as soon as the next stable release will come out.
 
-## Installation
+## Installation (Linux)
 * Copy the three folders in the `scripts` folder, which is inside the GRASS source code folder
 * Open a terminal window, enter each of the three folders and compile the code. For example, for the `v.osm.precomp` module, type:
 ```
@@ -16,6 +16,13 @@ cd path-to-GRASS-folder/scripts/v.osm.precomp
 sudo make
 sudo make install
 ```
+## Running the Script (Linux)
+To run simply the script, the installation is not mandatory, but recommended.
+* From GRASS top menu select File
+* Launch Script
+* Select a ".py" module such as "v.osm.precomp.py"
+* Select Open
+* Run the Script
 
 ## Related academic publications
 * Brovelli M. A., Minghini M., Molinari M. & Mooney P. (2015) A FOSS4G-based procedure to compare OpenStreetMap and authoritative road network datasets. *Geomatics Workbooks* 12, pp. 235-238, ISSN 1591-092X [[pdf](http://geomatica.como.polimi.it/workbooks/n12/FOSS4G-eu15_submission_70.pdf)]
